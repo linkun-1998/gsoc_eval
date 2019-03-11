@@ -86,6 +86,7 @@ with h5py.File(f_name, 'r') as f:
 # In[6]:
 
 
+#1st approachg for represnting the hdf in csv file
 #Converting the list to a CSV file using pandas
 def csv_file(pathlist, shapelist, sizelist): #dtypelist)
     df_dict = {}
@@ -104,10 +105,40 @@ def csv_file(pathlist, shapelist, sizelist): #dtypelist)
     return pd.DataFrame.from_dict(df_dict)
 
 df = csv_file(dataset_path, dataset_shape, dataset_size )#,dtype)
+df.to_csv('csv_file.csv') 
 df.head(10)
 
 
 # In[7]:
+
+
+'''The csv_file_2 splits the whole path of the dataset individually to groups
+sub_groups, and later sub_sub_groups. This will give a csv file more descriptive 
+leading to easy query '''
+def csv_file_2(pathlist, shapelist, sizelist): #dtypelist)
+    dflist = []
+    for path, shape, size in zip(dataset_path, dataset_shape, dataset_size):
+        lis = list(path.split('/'))[1:]
+        temp_dict = {}
+        for i, val in enumerate(lis):
+            if i!=len(lis)-1:
+                temp_dict['sub_'*i+'group'] = val
+            else:
+                temp_dict['dataset'] = val
+        temp_dict['shape'] = shape
+        temp_dict['size'] = size
+        dflist.append(temp_dict)
+    df = pd.DataFrame(dflist)
+    new_order=[1,4,5,0,2,3] #ordering the csv according to the requirement
+    df = df[df.columns[new_order]]   
+    return df
+
+df2 = csv_file_2(dataset_path, dataset_shape, dataset_size )#,dtype)
+df2.to_csv('split_csv_file.csv') #save to filename 'split_csv_file.csv'
+df2.head(10)
+
+
+# In[8]:
 
 
 # taking the image data from the group /AwakeEventData/XMPP-STREAK/StreakImage/
